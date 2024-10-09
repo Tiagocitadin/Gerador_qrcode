@@ -37,13 +37,47 @@ function gerarQRCode(text, containerId) {
     // Sanitiza o texto, mas mantendo os espaços e os caracteres especiais como acentos
     const sanitizedText = sanitizeTextForQRCode(text);
 
+    // Garante que o QRCode seja criado corretamente
     new QRCode(qrCodeContainer, {
         text: sanitizedText, // O texto será gerado com caracteres especiais e espaços preservados
         width: 150,
-        height: 150
+        height: 150,
+        correctLevel: QRCode.CorrectLevel.L // Configura o nível de correção do QR code
     });
 
     return qrCodeContainer;
+}
+
+// Função para gerar múltiplos QR Codes com base nos inputs do usuário
+function gerarMultiplosQRCodes(prefix, startNumber, quantity, info) {
+    const qrContainer = document.getElementById('qrcode-container');
+    qrContainer.innerHTML = ''; // Limpa os QR codes anteriores
+
+    // Verifica se a quantidade é válida
+    if (isNaN(quantity) || quantity <= 0) {
+        alert("Por favor, insira uma quantidade válida.");
+        return;
+    }
+
+    // Gera os QR Codes baseados no prefixo, número inicial, quantidade e informações adicionais
+    for (let i = 0; i < quantity; i++) {
+        const currentNumber = startNumber + i;
+        const qrCodeText = `${prefix}${currentNumber}\n${info}`;
+
+        console.log(`QR Code gerado: ${qrCodeText}`); // Exibir no console para conferência
+
+        const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${i}`);
+        qrContainer.appendChild(qrCodeElement);
+
+        // Ajusta o conteúdo para exibição, convertendo \n em <br> para quebrar a linha na página
+        const infoText = document.createElement('div');
+        infoText.classList.add('info-text');
+        infoText.innerHTML = qrCodeText.replace(/\n/g, '<br>');  // Substitui \n por <br> para exibição HTML
+
+        qrCodeElement.appendChild(infoText);
+    }
+
+    alert(`Foram gerados ${quantity} QR codes.`);
 }
 
 // Função para gerar QR Codes com base nos dados do Excel ou ODS
@@ -58,37 +92,35 @@ function gerarQRCodesComExcel() {
     }
 
     // Percorre todas as linhas do arquivo Excel/ODS e gera QR codes
-excelData.forEach((row, index) => {
-    // Acessa o conteúdo de 'COD' e 'Acabamento'
-    const cod = row.COD || `Sem Código ${index + 1}`;  // Se não houver COD, usar substituto
-    const acab = row.Acabamento || "Sem Informação";   // Se não houver Acabamento, usar substituto
+    excelData.forEach((row, index) => {
+        // Acessa o conteúdo de 'COD' e 'Acabamento'
+        const cod = row.COD || `Sem Código ${index + 1}`;  // Se não houver COD, usar substituto
+        const acab = row.Acabamento || "Sem Informação";   // Se não houver Acabamento, usar substituto
 
-    // Gera o texto do QR code com uma quebra de linha (\n) para leitura correta
-    const qrCodeText = `${cod}\n ${acab}`;  // Exemplo: 'COD123-45/AB\nFinishing-Type A/B'
+        // Gera o texto do QR code com uma quebra de linha (\n) para leitura correta
+        const qrCodeText = `${cod}\n${acab}`;
 
-    // Exibir o texto do QR Code para verificar
-    console.log(`QR Code gerado: ${qrCodeText}`);
+        // Exibir o texto do QR Code para verificar
+        console.log(`QR Code gerado: ${qrCodeText}`);
 
-    const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${index}`);
-    qrContainer.appendChild(qrCodeElement);
+        const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${index}`);
+        qrContainer.appendChild(qrCodeElement);
 
-    // Ajusta o conteúdo para exibição, convertendo \n em <br> para quebrar a linha na página
-    const infoText = document.createElement('div');
-    infoText.classList.add('info-text');
-    infoText.innerHTML = qrCodeText.replace(/\n/g, '<br>');  // Substitui \n por <br> para exibição HTML
+        // Ajusta o conteúdo para exibição, convertendo \n em <br> para quebrar a linha na página
+        const infoText = document.createElement('div');
+        infoText.classList.add('info-text');
+        infoText.innerHTML = qrCodeText.replace(/\n/g, '<br>');  // Substitui \n por <br> para exibição HTML
 
-    qrCodeElement.appendChild(infoText);
-});
+        qrCodeElement.appendChild(infoText);
+    });
 
-alert(`Foram gerados QR codes para ${excelData.length} registros da planilha.`);
-
-
+    alert(`Foram gerados QR codes para ${excelData.length} registros da planilha.`);
 }
 
-
-// Função para exportar QR codes e informações para PDF em um por página (formato para impressora Argox)
+// Função para exportar QR codes e informações para PDF em um por página
 function exportarPDF() {
-    const doc = new jspdf.jsPDF({
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
         orientation: 'landscape', // Configura o PDF em modo paisagem
         unit: 'mm',
         format: [75, 100] // Configura o tamanho da etiqueta em milímetros: 100mm x 75mm
@@ -102,8 +134,8 @@ function exportarPDF() {
 
         // Tamanho do QR code
         const qrSize = 40; // Tamanho do QR code em mm
-        const x = (75 - qrSize) / 2; // Centraliza o QR code horizontalmente na página (100mm largura)
-        const y = (100 - qrSize) / 2;  // Centraliza o QR code verticalmente na página (75mm altura)
+        const x = (75 - qrSize) / 2; // Centraliza o QR code horizontalmente na página
+        const y = (100 - qrSize) / 2;  // Centraliza o QR code verticalmente na página
 
         // Adiciona uma nova página apenas após o primeiro QR code
         if (index > 0) {
@@ -127,7 +159,6 @@ function exportarPDF() {
 
     doc.save('qrcodes-argox.pdf');
 }
-
 
 // Evento para gerar múltiplos QR codes com base no input do usuário ou Excel/ODS
 document.getElementById('generate-btn').addEventListener('click', function () {
