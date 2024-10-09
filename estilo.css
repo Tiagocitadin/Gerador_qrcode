@@ -1,8 +1,4 @@
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7f6;
-    margin: 0;
-    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -13,7 +9,6 @@ h1 {
     font-size: 2rem;
     margin-top: 20px;
 }
-
 
 label {
     font-weight: bold;
@@ -30,7 +25,6 @@ input[type="number"] {
     margin-right: 10px;
 }
 
-
 label {    
     margin-bottom: 8px; 
     font-weight: bold;
@@ -41,11 +35,10 @@ textarea {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    
 }
 
-#info-input  {
-    margin-top: 100px;
+#info-input {
+    margin-top: 50px;
 }
 
 #file-input {
@@ -56,12 +49,12 @@ textarea {
     margin-left: 10px;
     margin-right: 10px;
     margin-top: 40px;
-
 }
 
 #generate-btn,
 #limpardados,
-#pdf-btn {
+#pdf-btn,
+#print-btn  {
     padding: 10px 20px;
     background-color: #007BFF;
     color: white;
@@ -123,8 +116,40 @@ textarea {
 }
 
 .info-text {
-    font-size: 10px; /* Ajusta o tamanho da fonte para caber embaixo do QR Code */
-    text-align: center; /* Centraliza o texto embaixo do QR Code */
-    max-width: 150px; /* Garante que o texto não exceda a largura do QR Code */
-    word-wrap: break-word; /* Quebra o texto em várias linhas se for muito longo */
+    font-size: 10px;
+    text-align: center;
+    max-width: 150px;
+    word-wrap: break-word;
+}
+
+/* Estilos para impressão - mostra apenas os QR codes e oculta o resto */
+@media print {
+    /* Oculta todo o conteúdo da página */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Torna visível apenas o contêiner de QR codes */
+    #qrcode-container, #qrcode-container * {
+        visibility: visible;
+    }
+
+    /* Centraliza os QR codes na página de impressão */
+    #qrcode-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* Ajusta o estilo dos QR codes para impressão */
+    .qrcode {
+        page-break-inside: avoid;
+    }
+
+    /* Oculta a borda dos QR codes na impressão (opcional) */
+    .qrcode {
+        border: none;
+        box-shadow: none;
+    }
 }

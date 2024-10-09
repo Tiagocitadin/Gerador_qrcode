@@ -62,7 +62,7 @@ function gerarMultiplosQRCodes(prefix, startNumber, quantity, info) {
     // Gera os QR Codes baseados no prefixo, número inicial, quantidade e informações adicionais
     for (let i = 0; i < quantity; i++) {
         const currentNumber = startNumber + i;
-        const qrCodeText = `${prefix}${currentNumber}\n${info}`;
+        const qrCodeText = `${prefix.toUpperCase()}${currentNumber}\n${info}`;
 
         console.log(`QR Code gerado: ${qrCodeText}`); // Exibir no console para conferência
 
@@ -188,4 +188,9 @@ document.getElementById('limpardados').addEventListener('click', function () {
 // Evento para exportar QR codes para PDF
 document.getElementById('pdf-btn').addEventListener('click', function () {
     exportarPDF();
+});
+
+// Evento para imprimir os QR codes gerados
+document.getElementById('print-btn').addEventListener('click', function () {
+    window.print();
 });
