@@ -1,5 +1,11 @@
 let excelData = []; // Variável para armazenar os dados do Excel ou ODS
 
+// Função para exibir mensagens no span
+function showMessage(message) {
+    const messageSpan = document.getElementById('message-span');
+    messageSpan.textContent = message;
+}
+
 // Função para ler o arquivo Excel ou ODS e extrair os dados
 document.getElementById('file-input').addEventListener('change', function (e) {
     const file = e.target.files[0];
@@ -17,7 +23,7 @@ document.getElementById('file-input').addEventListener('change', function (e) {
         // Exibe os dados no console para garantir que estão corretos
         console.log('Dados lidos do arquivo:', excelData);
 
-        alert(`Dados do arquivo carregados com sucesso! Total de registros: ${excelData.length}`);
+        showMessage(`Dados do arquivo carregados com sucesso! Total de registros: ${excelData.length}`);
     };
     reader.readAsArrayBuffer(file);
 });
@@ -55,7 +61,7 @@ function gerarMultiplosQRCodes(prefix, startNumber, quantity, info) {
 
     // Verifica se a quantidade é válida
     if (isNaN(quantity) || quantity <= 0) {
-        alert("Por favor, insira uma quantidade válida.");
+        showMessage("Por favor, insira uma quantidade válida.");
         return;
     }
 
@@ -77,7 +83,7 @@ function gerarMultiplosQRCodes(prefix, startNumber, quantity, info) {
         qrCodeElement.appendChild(infoText);
     }
 
-    alert(`Foram gerados ${quantity} QR codes.`);
+    showMessage(`Foram gerados ${quantity} QR codes.`);
 }
 
 // Função para gerar QR Codes com base nos dados do Excel ou ODS
@@ -87,34 +93,37 @@ function gerarQRCodesComExcel() {
 
     // Verifica se os dados da planilha estão carregados
     if (excelData.length === 0) {
-        alert("Nenhum dado foi carregado da planilha.");
+        showMessage("Nenhum dado foi carregado da planilha.");
         return;
     }
 
-    // Percorre todas as linhas do arquivo Excel/ODS e gera QR codes
-    excelData.forEach((row, index) => {
-        // Acessa o conteúdo de 'COD' e 'Acabamento'
-        const cod = row.COD || `Sem Código ${index + 1}`;  // Se não houver COD, usar substituto
-        const acab = row.Acabamento || "Sem Informação";   // Se não houver Acabamento, usar substituto
+    // Função auxiliar para gerar cada QR code com um pequeno atraso
+    const generateQRCodeWithDelay = (row, index) => {
+        setTimeout(() => {
+            const cod = row.COD || `Sem Código ${index + 1}`;  // Se não houver COD, usar substituto
+            const acab = row.Acabamento || "Sem Informação";   // Se não houver Acabamento, usar substituto
 
-        // Gera o texto do QR code com uma quebra de linha (\n) para leitura correta
-        const qrCodeText = `${cod}\n${acab}`;
+            // Gera o texto do QR code com uma quebra de linha (\n) para leitura correta
+            const qrCodeText = `${cod}\n${acab}`;
 
-        // Exibir o texto do QR Code para verificar
-        console.log(`QR Code gerado: ${qrCodeText}`);
+            console.log(`QR Code gerado: ${qrCodeText}`);
 
-        const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${index}`);
-        qrContainer.appendChild(qrCodeElement);
+            const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${index}`);
+            qrContainer.appendChild(qrCodeElement);
 
-        // Ajusta o conteúdo para exibição, convertendo \n em <br> para quebrar a linha na página
-        const infoText = document.createElement('div');
-        infoText.classList.add('info-text');
-        infoText.innerHTML = qrCodeText.replace(/\n/g, '<br>');  // Substitui \n por <br> para exibição HTML
+            // Ajusta o conteúdo para exibição, convertendo \n em <br> para quebra de linha na página
+            const infoText = document.createElement('div');
+            infoText.classList.add('info-text');
+            infoText.innerHTML = qrCodeText.replace(/\n/g, '<br>');  // Substitui \n por <br> para exibição HTML
 
-        qrCodeElement.appendChild(infoText);
-    });
+            qrCodeElement.appendChild(infoText);
+        }, index * 100); // Delay de 100 ms para cada QR code
+    };
 
-    alert(`Foram gerados QR codes para ${excelData.length} registros da planilha.`);
+    // Percorre todas as linhas do arquivo Excel/ODS e gera QR codes para todos os registros com atraso
+    excelData.forEach(generateQRCodeWithDelay);
+
+    showMessage(`Foram gerados QR codes para ${excelData.length} registros da planilha.`);
 }
 
 // Função para exportar QR codes e informações para PDF em um por página
@@ -174,15 +183,23 @@ document.getElementById('generate-btn').addEventListener('click', function () {
     }
 });
 
-// Função para limpar os dados
+// Função para limpar todos os dados e QR codes gerados
 document.getElementById('limpardados').addEventListener('click', function () {
+    // Limpa o contêiner de QR codes
     document.getElementById('qrcode-container').innerHTML = '';
+
+    // Limpa todos os campos de entrada
     document.getElementById('prefix-input').value = '';
     document.getElementById('start-input').value = '1';
     document.getElementById('quantity-input').value = '';
     document.getElementById('info-input').value = '';
     document.getElementById('file-input').value = '';
+
+    // Zera a variável excelData
     excelData = [];
+
+    // Exibe a mensagem de limpeza
+    showMessage('Todos os dados e QR codes foram limpos com sucesso!');
 });
 
 // Evento para exportar QR codes para PDF
