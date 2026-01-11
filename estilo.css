@@ -143,6 +143,9 @@ textarea {
     /* Oculta todo o conteúdo da página */
     body * {
         visibility: hidden;
+        .info-text {
+            display: block !important;
+        }
     }
 
     /* Torna visível apenas o contêiner de QR codes */
