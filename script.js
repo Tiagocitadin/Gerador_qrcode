@@ -67,21 +67,28 @@ function gerarMultiplosQRCodes(prefix, startNumber, quantity, info) {
 
     // Gera os QR Codes baseados no prefixo, número inicial, quantidade e informações adicionais
     for (let i = 0; i < quantity; i++) {
-        const currentNumber = startNumber + i;
-        const qrCodeText = `${prefix.toUpperCase()}${currentNumber}\n${info}`;
 
-        console.log(`QR Code gerado: ${qrCodeText}`); // Exibir no console para conferência
+    let currentNumber = "";
 
-        const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${i}`);
-        qrContainer.appendChild(qrCodeElement);
-
-        // Ajusta o conteúdo para exibição, convertendo \n em <br> para quebrar a linha na página
-        const infoText = document.createElement('div');
-        infoText.classList.add('info-text');
-        infoText.innerHTML = qrCodeText.replace(/\n/g, '<br>');  // Substitui \n por <br> para exibição HTML
-
-        qrCodeElement.appendChild(infoText);
+    // Só usa o número inicial se estiver preenchido E for número
+    if (!isNaN(startNumber) && startNumber !== "" && startNumber !== null) {
+        currentNumber = Number(startNumber) + i;
     }
+
+    // Monta o texto final sem NaN e sem número quando vazio
+    const qrCodeText =
+        `${prefix ? prefix.toUpperCase() : ""}` +
+        `${currentNumber ? currentNumber : ""}` +
+        `${info ? "\n" + info : ""}`;
+
+    console.log(`QR Code gerado: ${qrCodeText}`);
+
+    const qrCodeElement = gerarQRCode(qrCodeText, `qrcode-${i}`);
+    qrContainer.appendChild(qrCodeElement);
+
+    // Removido infoText para NÃO aparecer texto abaixo do QR Code
+    }
+
 
     showMessage(`Foram gerados ${quantity} QR codes.`);
 }
@@ -139,7 +146,13 @@ function exportarPDF() {
 
     qrCodes.forEach((qr, index) => {
         const qrCanvas = qr.querySelector('canvas');
-        const qrText = qr.querySelector('.info-text').textContent;
+        let qrText = "";
+        const infoElement = qr.querySelector('.info-text');
+
+        if (infoElement) {
+            qrText = infoElement.textContent;
+        }
+
 
         // Tamanho do QR code
         const qrSize = 40; // Tamanho do QR code em mm
